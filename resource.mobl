@@ -1,0 +1,9 @@
+module resource
+
+entity Resource {
+	id: Num
+	part: String
+	description: String
+	icon: String
+	box: String
+}

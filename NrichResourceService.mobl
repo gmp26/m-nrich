@@ -1,0 +1,28 @@
+module NrichResourceService
+
+type NrichResource {
+	title : String
+	link : String
+	description : String
+	icon_path : String
+	resourceTypeID: Num
+	keystage1 : Num
+	keystage2 : Num
+	keystage3 : Num
+	keystage4 : Num
+	keystage4plus : Num
+}
+
+function nrichResourceMapper(json:JSON) : [NrichResource] {
+	return json;
+}
+
+/*    uri = "http://nrich.maths.org/monthindex.php?mm=1&output=json" */
+
+service NRICH {
+  resource thisMonthKS1() : [NrichResource] {
+    uri = "http://nrich.maths.org/public/monthindex.php?showfulltier=yes&output=json"
+    encoding = "jsonp"
+    mapper = nrichResourceMapper
+  }
+}

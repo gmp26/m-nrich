@@ -1,0 +1,44 @@
+module ui
+
+mixin mobl::ui::generic
+
+style accordionStyle {
+	//margin:5px;
+}
+
+style accordionStyle activeSectionHeaderStyle {
+  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#d0e0ff));
+  background: -moz-linear-gradient(top, #eef, #cdf);
+  border-radius:10px;
+//  padding: 0;
+  height: 2.9em;
+//  font-size: 1em;
+  line-height: 2.9em;
+//  font-weight: bold;
+//  text-align: left;
+  color: #fa0;
+//  font-weight: bold;
+//  margin: 0;
+//  z-index: 2;
+//  width: 100%;
+//  display: block;
+}
+
+style accordionStyle inActiveSectionHeaderStyle {
+  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#eef), to(#cdf));
+  background: -moz-linear-gradient(top, #eef, #cdf);
+  border-radius:10px;
+
+  padding: 0;
+  height: 2.9em;
+  font-size: 1em;
+  line-height: 2.9em;
+  font-weight: bold;
+  text-align: left;
+  color: #38f;
+  font-weight: bold;
+  margin: 0;
+  z-index: 2;
+  width: 100%;
+  display: block;
+}

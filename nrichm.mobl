@@ -1,0 +1,137 @@
+application nrichm
+
+//import mobl::ui::generic
+import ui
+import NrichResourceService
+import utils
+
+external var resources:[NrichResource];
+
+screen root() {
+	tabSet([
+		(monthAsString(), "", test)
+	])
+}
+
+style iconStyle {
+	padding-right:10px;
+}
+
+function ks1Filter(res:NrichResource):Bool
+{
+	if(res.keystage1==1 && res.resourceTypeID==1 && weeklyChallengeFilter(res)==false )
+		return true;
+}
+function ks2Filter(res:NrichResource):Bool
+{
+	if(res.keystage2==1 && res.resourceTypeID==1 && weeklyChallengeFilter(res)==false)
+		return true;
+}
+function ks3Filter(res:NrichResource):Bool
+{
+	if(res.keystage3==1 && res.resourceTypeID==1 && weeklyChallengeFilter(res)==false)
+		return true;
+}
+function ks4Filter(res:NrichResource):Bool
+{
+	if(res.keystage4==1 && res.resourceTypeID==1 && weeklyChallengeFilter(res)==false)
+		return true;
+}
+function ks5Filter(res:NrichResource):Bool
+{
+	if(res.keystage4plus==1 && res.resourceTypeID==1 && weeklyChallengeFilter(res)==false)
+		return true;
+}
+function articleFilter(res:NrichResource):Bool
+{
+	if(res.resourceTypeID==3)
+		return true;
+}
+
+function weeklyChallengeFilter(res:NrichResource):Bool
+{
+	//return res.title.indexOf("Weekly") == 0;
+	
+	var re:RegExp = /^\s*Weekly\s+Challenge/i;
+	
+	var matches:Array<String> = (res.title.match(re));
+	if(matches != null && matches.length > 0) {
+		res.title = res.title.replace(re, "");
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+
+var ksFilters:Array<Function1<NrichResource,Bool>> = [
+	null, ks1Filter, ks2Filter, ks3Filter, ks4Filter, ks5Filter
+];
+
+control listFiltered(resources:[NrichResource], filter:Function1<NrichResource,Bool>) 
+{
+	var base:String = "http://nrich.maths.org"
+	list(resource in resources.filter(filter)) {
+		item(onclick = {
+			openUrl(resource.link + "&withjs=1");
+		}) {
+			image(base+resource.icon_path, width=30, height=30, valign="middle", style=iconStyle)
+			label(resource.title)
+		}
+	}
+}
+
+control ksGroup(ks:Num) {
+	var resources:[NrichResource] = NRICH.thisMonthKS1()
+  	group {
+  		listFiltered(resources, ksFilters[ks])
+	}
+}
+
+control ks1() {
+	ksGroup(1)
+}
+
+control ks2() {
+	ksGroup(2)
+}
+
+control ks3() {
+	ksGroup(3)
+}
+
+control ks4() {
+	ksGroup(4)
+}
+
+control ks5() {
+	ksGroup(5)
+}
+
+control articles() {
+	var resources:[NrichResource] = NRICH.thisMonthKS1()
+  	group {
+  		listFiltered(resources, articleFilter)
+	}
+}
+
+control weeklyChallenges() {
+	var resources:[NrichResource] = NRICH.thisMonthKS1()
+  	group {
+  		listFiltered(resources, weeklyChallengeFilter)
+	}
+}
+
+control test() {
+  	header("NRICH "+monthAsString())
+  	accordion([
+  		("Stage1", ks1),
+  		("Stage2", ks2),
+  		("Stage3", ks3),
+  		("Stage4", ks4),
+  		("Stage5", ks5),
+  		("Articles", articles),
+  		("Weekly Challenges", weeklyChallenges)
+  	])
+}
