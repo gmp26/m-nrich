@@ -67,6 +67,12 @@ function weeklyChallengeFilter(res:NrichResource):Bool
 }
 
 
+function nullFilter(res:NrichResource):Bool
+{
+	return true;
+}
+
+
 var ksFilters:Array<Function1<NrichResource,Bool>> = [
 	null, ks1Filter, ks2Filter, ks3Filter, ks4Filter, ks5Filter
 ];
@@ -122,13 +128,6 @@ control weeklyChallenges(month:String, year:String) {
 	var resources:[NrichResource] = NRICH.pastMonth(month, year)
   	group {
   		listFiltered(resources, weeklyChallengeFilter)
-	}
-}
-
-control ksGroupSearch(ks:Num, key:String) {
-	var resources:[NrichResource] = NRICH.keywordSearch(key)
-  	group {
-  		listFiltered(resources, ksFilters[ks])
 	}
 }
 
@@ -188,36 +187,40 @@ control archive() {
 	}
 }
 
+control ksGroupSearch(ks:Num, resources:[NrichResource]) {
+  	group {
+  		listFiltered(resources, ksFilters[ks])
+	}
+}
+
 /* Searching controls */
-control ks1Search(key:String) {
-	ksGroupSearch(1,key)
+control ks1Search(resources:[NrichResource]) {
+	ksGroupSearch(1,resources)
 }
 
-control ks2Search(key:String) {
-	ksGroupSearch(2, key)
+control ks2Search(resources:[NrichResource]) {
+	ksGroupSearch(2, resources)
 }
 
-control ks3Search(key:String) {
-	ksGroupSearch(3, key)
+control ks3Search(resources:[NrichResource]) {
+	ksGroupSearch(3, resources)
 }
 
-control ks4Search(key:String) {
-	ksGroupSearch(4, key)
+control ks4Search(resources:[NrichResource]) {
+	ksGroupSearch(4, resources)
 }
 
-control ks5Search(key:String) {
-	ksGroupSearch(5, key)
+control ks5Search(resources:[NrichResource]) {
+	ksGroupSearch(5, resources)
 }
 
-control articlesSearch(key:String) {
-	var resources:[NrichResource] = NRICH.keywordSearch(key)
+control articlesSearch(resources:[NrichResource]) {
   	group {
   		listFiltered(resources, articleFilter)
 	}
 }
 
-control weeklyChallengesSearch(key:String) {
-	var resources:[NrichResource] = NRICH.keywordSearch(key)
+control weeklyChallengesSearch(resources:[NrichResource]) {
   	group {
   		listFiltered(resources, weeklyChallengeFilter)
 	}
@@ -232,13 +235,17 @@ control search() {
 			button("by keyword", onclick={
 				keywordSearch(key);
 			})
+			/*
 			button("by title", onclick={
 				titleSearch(key);
 			})
+			*/
 		}
+		/*
 		item() {
 			label("by topic")
 		}
+		*/
 	}
 }
 
@@ -246,8 +253,8 @@ screen keywordSearch(key:String) {
 	header("Keyword Search") {
 		backButton()
 	}
-	var results = async(NRICH.keywordSearch(key))
-  	whenLoaded(results) {
+	var resources:[NrichResource] = async(NRICH.keywordSearch(key))
+  	whenLoaded(resources) {
   		searchAccordion([
 	  		("Stage1", ks1Search),
 	  		("Stage2", ks2Search),
@@ -256,26 +263,26 @@ screen keywordSearch(key:String) {
 	  		("Stage5", ks5Search),
 	  		("Articles", articlesSearch),
 	  		("Weekly Challenges", weeklyChallengesSearch)
-  		], key)
+  		], resources)
   	}
 }
 
 screen titleSearch(key:String) {
-	header("Keyword Search") {
+	header("Title Search") {
 		backButton()
 	}
-	var results = async(NRICH.titleSearch(key))
-  	whenLoaded(results) {
-  		searchAccordion([
-	  		("Stage1", ks1Search),
-	  		("Stage2", ks2Search),
-	  		("Stage3", ks3Search),
-	  		("Stage4", ks4Search),
-	  		("Stage5", ks5Search),
-	  		("Articles", articlesSearch),
-	  		("Weekly Challenges", weeklyChallengesSearch)
-  		], key)
+	var resources:[NrichResource] = async(NRICH.titleSearch(key))
+  	whenLoaded(resources) {
+	  	group {
+	  		listFiltered(resources, function (res:NrichResource):Bool
+			{
+				log(res.title);
+				return(res.title.toLowerCase().indexOf(key.toLowerCase()) >= 0);
+			})
+		}
   	}
 }
+  	
+
 
 

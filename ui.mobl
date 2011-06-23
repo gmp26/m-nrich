@@ -1,5 +1,7 @@
 module ui
 
+import NrichResourceService
+
 mixin mobl::ui::generic
 
 style mixin shadowMixin($inset, $offsetX, $offsetY, $blurRadius, $color) {
@@ -66,7 +68,7 @@ control monthAccordion(sections : [(String, Control2<String,String>)], month:Str
   }
 }
 
-control searchAccordion(sections : [(String, Control1<String>)], key:String, activeSection : String = null) {
+control searchAccordion(sections : [(String, Control1<[NrichResource]>)], resources:[NrichResource], activeSection : String = null) {
   var activeSection : String = activeSection ? activeSection : sections.get(0)._1
 
   block(accordionStyle) {
@@ -75,7 +77,7 @@ control searchAccordion(sections : [(String, Control1<String>)], key:String, act
         label(sectionName)
       }
       block(activeSection == sectionName ? activeSectionStyle : inActiveSectionStyle) {
-        sectionControl(key)
+        sectionControl(resources)
       }
     }
   }
