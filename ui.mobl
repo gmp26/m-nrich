@@ -2,14 +2,23 @@ module ui
 
 mixin mobl::ui::generic
 
-style accordionStyle {
-	//margin:5px;
+style mixin shadowMixin($inset, $offsetX, $offsetY, $blurRadius, $color) {
+  -webkit-box-shadow: $inset $offsetX $offsetY $blurRadius $blurRadius $color;
+  -moz-box-shadow: $inset $offsetX $offsetY $blurRadius $blurRadius $color;
+  box-shadow: $inset $offsetX $offsetY $blurRadius $blurRadius $color;
 }
+
+style accordionStyle {
+//	padding:5px;
+//  	shadowMixin(inset, 0px, 0px, 2px, #888);
+//  	borderRadiusMixin(10px);
+}
+
 
 style accordionStyle activeSectionHeaderStyle {
   background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#d0e0ff));
   background: -moz-linear-gradient(top, #eef, #cdf);
-  border-radius:10px;
+
 //  padding: 0;
   height: 2.9em;
 //  font-size: 1em;
@@ -20,16 +29,16 @@ style accordionStyle activeSectionHeaderStyle {
 //  font-weight: bold;
 //  margin: 0;
 //  z-index: 2;
-//  width: 100%;
+//  width: auto;
 //  display: block;
 }
 
 style accordionStyle inActiveSectionHeaderStyle {
   background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#eef), to(#cdf));
   background: -moz-linear-gradient(top, #eef, #cdf);
-  border-radius:10px;
 
   padding: 0;
+  margin: 0;
   height: 2.9em;
   font-size: 1em;
   line-height: 2.9em;
@@ -37,8 +46,52 @@ style accordionStyle inActiveSectionHeaderStyle {
   text-align: left;
   color: #38f;
   font-weight: bold;
-  margin: 0;
   z-index: 2;
-  width: 100%;
+  width: auto;
   display: block;
+}
+
+control monthAccordion(sections : [(String, Control2<String,String>)], month:String, year:String, activeSection : String = null) {
+  var activeSection : String = activeSection ? activeSection : sections.get(0)._1
+
+  block(accordionStyle) {
+    list((sectionName, sectionControl) in sections) {
+      span(onclick={ activeSection = sectionName; }, cssClass=activeSection == sectionName ? activeSectionHeaderStyle : inActiveSectionHeaderStyle) {
+        label(sectionName)
+      }
+      block(activeSection == sectionName ? activeSectionStyle : inActiveSectionStyle) {
+        sectionControl(month, year)
+      }
+    }
+  }
+}
+
+control searchAccordion(sections : [(String, Control1<String>)], key:String, activeSection : String = null) {
+  var activeSection : String = activeSection ? activeSection : sections.get(0)._1
+
+  block(accordionStyle) {
+    list((sectionName, sectionControl) in sections) {
+      span(onclick={ activeSection = sectionName; }, cssClass=activeSection == sectionName ? activeSectionHeaderStyle : inActiveSectionHeaderStyle) {
+        label(sectionName)
+      }
+      block(activeSection == sectionName ? activeSectionStyle : inActiveSectionStyle) {
+        sectionControl(key)
+      }
+    }
+  }
+}
+
+style headerContainerStyle {
+  width: 180px;
+  position: absolute;
+  left: 50%;
+}
+
+style headerTextStyle {
+  position: absolute;
+  left: -90px;
+  width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

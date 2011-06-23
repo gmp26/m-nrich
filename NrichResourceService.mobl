@@ -17,7 +17,17 @@ function nrichResourceMapper(json:JSON) : [NrichResource] {
 	return json;
 }
 
-/*    uri = "http://nrich.maths.org/monthindex.php?mm=1&output=json" */
+type PastIssue {
+	theme : String // description of theme if any
+	year : String // numeric year YYYY
+	month : String // numeric month MM
+	date : String // Month as text + YYYY
+}
+
+function pastIssueMapper(json:JSON) : [PastIssue] {
+	return json;
+}
+
 
 service NRICH {
   resource thisMonthKS1() : [NrichResource] {
@@ -25,4 +35,25 @@ service NRICH {
     encoding = "jsonp"
     mapper = nrichResourceMapper
   }
+  resource pastMonth(month:String, year:String) : [NrichResource] {
+  	uri = "http://nrich.maths.org/public/monthindex.php?year="+year+"&month="+month+"&showfulltier=yes&output=json"
+    encoding = "jsonp"
+    mapper = nrichResourceMapper
+  }
+  resource pastIssues() : [PastIssue] {
+  	uri = "http://nrich.maths.org/public/themes.php?output=json"
+  	encoding = "jsonp"
+  	mapper = pastIssueMapper
+  }
+  resource keywordSearch(key:String) : [NrichResource] {
+  	uri = "http://nrich.maths.org/public/search.php?search=" + key + "&output=json"
+  	encoding = "jsonp"
+  	mapper = nrichResourceMapper
+  }
+  resource titleSearch(key:String) : [NrichResource] {
+  	uri = "http://http://nrich.maths.org/public/leg.php?codesearch=" + key + "&output=json"
+  	encoding = "jsonp"
+  	mapper = nrichResourceMapper
+  }
+
 }

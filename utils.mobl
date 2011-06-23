@@ -4,7 +4,28 @@ var months:Array<String> = [
 	"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"
 ];
 
+function shortDate(date:String):String {
+	var mmyyyy:Array<String> = date.split(" ");
+	var result:String = "";
+	var mm:String = mmyyyy.get(0);
+	if(mm.length > 3) {
+		mmyyyy.remove(mm);
+		mmyyyy.insert(0, mm.substr(0,3));
+	}
+	return mmyyyy.join(" ");
+}
+
 function monthAsString():String
 {	
 	return months[now().getMonth()];
+}
+
+function monthNumeric():String
+{
+	return (now().getMonth() + 1).toString();
+}
+
+function yearNumeric():String
+{
+	return now().getFullYear().toString();
 }
