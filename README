@@ -1,1 +1,3 @@
 This is a webapp built with mob-lang (http://www.mobl-lang.org) to provide a mobile friendly version of http://nrich.maths.org. Server side code is omitted, but it's just a few searches that return JSON.
+
+The app runs on iphones/pads/pods, android, and also chrome, safari and firefox on the desktop. Installed at http://nrich.maths.org/mobl/nrichm/nrichm.html
