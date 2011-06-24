@@ -7,6 +7,8 @@ import utils
 
 external var resources:[NrichResource];
 
+resource icon.png
+
 screen root() {
 	tabSet([
 		("This Issue", "", thisMonth),
@@ -54,11 +56,11 @@ function weeklyChallengeFilter(res:NrichResource):Bool
 {
 	//return res.title.indexOf("Weekly") == 0;
 	
-	var re:RegExp = /^\s*Weekly\s+Challenge/i;
-	
+	var re:RegExp = /^\s*Weekly\s+/i;
+
 	var matches:Array<String> = (res.title.match(re));
 	if(matches != null && matches.length > 0) {
-		res.title = res.title.replace(re, "");
+		res.title = res.title.replace(/Challenge /, "");
 		return true;
 	}
 	else {
@@ -82,7 +84,7 @@ control listFiltered(resources:[NrichResource], filter:Function1<NrichResource,B
 	var base:String = "http://nrich.maths.org"
 	list(resource in resources.filter(filter)) {
 		item(onclick = {
-			openUrl(resource.link + "&withjs=1");
+			resourceDetail(resource);
 		}) {
 			image(base+resource.icon_path, width=30, height=30, valign="middle", style=iconStyle)
 			label(resource.title)
@@ -90,58 +92,89 @@ control listFiltered(resources:[NrichResource], filter:Function1<NrichResource,B
 	}
 }
 
-control ksGroup(ks:Num, month:String, year:String) {
-	var resources:[NrichResource] = NRICH.pastMonth(month, year)
-  	group {
-  		listFiltered(resources, ksFilters[ks])
+style descriptionStyle {
+	background-color:#fff;
+	margin:0px;
+	padding: 20px;
+	color:#888;
+  	white-space: wrap;
+}
+
+screen resourceDetail(resource:NrichResource) {
+	header("Navigator") {
+		backButton()
+	}
+	group() {
+		item(onclick={
+				var title:String = resource.resourceTypeID==1 ? "Problem" : "Article";
+				display(resource, resource.link + "&withjs=1", title);
+			}) {
+			var base:String = "http://nrich.maths.org"
+			image(base+resource.icon_path, width=30, height=30, valign="middle", style=iconStyle)
+			label(resource.title)
+		}
+		block(descriptionStyle) {
+			html(resource.description)
+		}
+	}
+	resourceNavigation(resource)
+}
+
+control resourceNavigation(resource:NrichResource) {
+	group() {
+		when(resource.clue_link && resource.clue_link != "") {
+			item(onclick={
+				display(resource, resource.clue_link + "&withjs=1", "Hints");
+			}) {
+				label("Hint")
+			}
+		}
+		when(resource.note_link && resource.note_link != "") {
+			item(onclick={
+				display(resource, resource.note_link + "&withjs=1", "Teachers' Notes");
+			}) {
+				label("Teachers' Notes")
+			}
+		}
+		when(resource.solution_link && resource.solution_link != "") {
+			item(onclick={
+				display(resource, resource.solution_link + "&withjs=1", "Solutions");
+			}) {
+				label("Solutions")
+			}
+		}
+		/*
+		 * Enable this when I know how to zoom a view inside a mobl screen 
+		 */
+		item(onclick={
+				display(resource, resource.link, "Standard View");
+			}) {
+				label("Full View")
+			}
 	}
 }
 
-control ks1(month:String, year:String) {
-	ksGroup(1, month, year)
-}
-
-control ks2(month:String, year:String) {
-	ksGroup(2, month, year)
-}
-
-control ks3(month:String, year:String) {
-	ksGroup(3, month, year)
-}
-
-control ks4(month:String, year:String) {
-	ksGroup(4, month, year)
-}
-
-control ks5(month:String, year:String) {
-	ksGroup(5, month, year)
-}
-
-control articles(month:String, year:String) {
-	var resources:[NrichResource] = NRICH.pastMonth(month, year)
-  	group {
-  		listFiltered(resources, articleFilter)
+screen display(resource:NrichResource, url:String, title:String) {
+	header(title) {
+		backButton()
 	}
-}
-
-control weeklyChallenges(month:String, year:String) {
-	var resources:[NrichResource] = NRICH.pastMonth(month, year)
-  	group {
-  		listFiltered(resources, weeklyChallengeFilter)
-	}
+	<iframe src=url width="100%" height="100%"/>	
 }
 
 control thisMonth() {
-  	header("NRICH "+monthAsString()) 
-  	monthAccordion([
-  		("Stage1", ks1),
-  		("Stage2", ks2),
-  		("Stage3", ks3),
-  		("Stage4", ks4),
-  		("Stage5", ks5),
-  		("Articles", articles),
-  		("Weekly Challenges", weeklyChallenges)
-  	], monthNumeric(), yearNumeric())
+	header("NRICH "+monthAsString()) 
+	var resources:[NrichResource] = async(NRICH.pastMonth(monthNumeric(), yearNumeric()))
+  	whenLoaded(resources) {
+  		searchAccordion([
+	  		("Stage1", ks1Search),
+	  		("Stage2", ks2Search),
+	  		("Stage3", ks3Search),
+	  		("Stage4", ks4Search),
+	  		("Stage5", ks5Search),
+	  		("Articles", articlesSearch),
+	  		("Weekly Challenges", weeklyChallengesSearch)
+  		], resources)
+  	}
 }
 
 style themeDetailStyle {
@@ -150,26 +183,23 @@ style themeDetailStyle {
 } 
 
 screen pastMonth(issue:PastIssue) {
-	header("NRICH " + shortDate(issue.date)) {
+	header("NRICH "+shortDate(issue.date)) {
 		backButton()
 	}
-	group() {
-		item() {
-			label(issue.theme, style=themeDetailStyle)
-		}
-		item() {
-		  	monthAccordion([
-		  		("Stage1", ks1),
-		  		("Stage2", ks2),
-		  		("Stage3", ks3),
-		  		("Stage4", ks4),
-		  		("Stage5", ks5),
-		  		("Articles", articles),
-		  		("Weekly Challenges", weeklyChallenges)
-		  	], issue.month, issue.year)
-		}
-	}
+	var resources:[NrichResource] = async(NRICH.pastMonth(issue.month, issue.year))
+  	whenLoaded(resources) {
+  		searchAccordion([
+	  		("Stage1", ks1Search),
+	  		("Stage2", ks2Search),
+	  		("Stage3", ks3Search),
+	  		("Stage4", ks4Search),
+	  		("Stage5", ks5Search),
+	  		("Articles", articlesSearch),
+	  		("Weekly Challenges", weeklyChallengesSearch)
+  		], resources)
+  	}
 }
+
 
 control archive() {
 	var pastIssues:[PastIssue] = NRICH.pastIssues()
@@ -235,11 +265,9 @@ control search() {
 			button("by keyword", onclick={
 				keywordSearch(key);
 			})
-			/*
 			button("by title", onclick={
 				titleSearch(key);
 			})
-			*/
 		}
 		/*
 		item() {
@@ -249,21 +277,25 @@ control search() {
 	}
 }
 
+control searchResults(resources:[NrichResource]) {
+	searchAccordion([
+  		(resources.filter(ks1Filter).length.toString() +" found at Stage 1", ks1Search),
+  		(resources.filter(ks2Filter).length.toString() +" found at Stage 2", ks2Search),
+  		(resources.filter(ks3Filter).length.toString() +" found at Stage 3", ks3Search),
+  		(resources.filter(ks4Filter).length.toString() +" found at Stage 4", ks4Search),
+  		(resources.filter(ks5Filter).length.toString() +" found at Stage 5", ks5Search),
+  		(resources.filter(articleFilter).length.toString() +" Articles", articlesSearch),
+  		(resources.filter(weeklyChallengeFilter).length.toString() +" Weekly Challenges", weeklyChallengesSearch)
+	], resources)
+}
+
 screen keywordSearch(key:String) {
 	header("Keyword Search") {
 		backButton()
 	}
 	var resources:[NrichResource] = async(NRICH.keywordSearch(key))
   	whenLoaded(resources) {
-  		searchAccordion([
-	  		("Stage1", ks1Search),
-	  		("Stage2", ks2Search),
-	  		("Stage3", ks3Search),
-	  		("Stage4", ks4Search),
-	  		("Stage5", ks5Search),
-	  		("Articles", articlesSearch),
-	  		("Weekly Challenges", weeklyChallengesSearch)
-  		], resources)
+  		searchResults(resources)
   	}
 }
 
@@ -273,13 +305,7 @@ screen titleSearch(key:String) {
 	}
 	var resources:[NrichResource] = async(NRICH.titleSearch(key))
   	whenLoaded(resources) {
-	  	group {
-	  		listFiltered(resources, function (res:NrichResource):Bool
-			{
-				log(res.title);
-				return(res.title.toLowerCase().indexOf(key.toLowerCase()) >= 0);
-			})
-		}
+  		searchResults(resources)
   	}
 }
   	
