@@ -1,0 +1,1 @@
+This is a webapp built with mob-lang (http://www.mobl-lang.org) to provide a mobile friendly version of http://nrich.maths.org. Server side code is omitted, but it's just a few searches that return JSON.
